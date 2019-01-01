@@ -134,9 +134,15 @@ function et_ClientCommand(c, command)
 		end
 
 		if clients[c].team == 1 or clients[c].team == 2 then
-			if team == -1 or (team ~= -1 and team == clients[c].team) then
+
+			if team == -1 then
 				return 1
 			end
+
+			if team == clients[c].team then
+				return 0
+			end
+
 		end
 
 		local class
