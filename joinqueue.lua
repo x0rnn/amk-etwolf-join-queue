@@ -157,6 +157,8 @@ function et_ConsoleCommand()
 			team = 1
 		elseif command == "putallies" then
 			team = 2
+		elseif command == "putany" then
+			team = nil
 		elseif command == "remove" then
 			team = 3
 		else
@@ -177,9 +179,18 @@ function et_ConsoleCommand()
 				return 0
 			end
 
-			et.G_Print("et_ConsoleCommand\n")
+			if clients[c].team == 1 or clients[c].team == 2 then
+				if team == nil or (team ~= nil and team == clients[c].team) then
+					return 1
+				end
+			end
+
 			if not jq_Add(c, team, nil, nil, nil) then
-				return 0
+				if team == nil then
+					return 1
+				else
+					return 0
+				end
 			end
 
 		end
