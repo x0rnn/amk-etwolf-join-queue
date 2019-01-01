@@ -652,6 +652,6 @@ end
 
 function jq_Welcome(c)
 	if welcome ~= nil then
-		table.insert(delays, { func = function() et.trap_SendServerCommand(c, "b 8 \"" .. welcome .. "\"\n") end, frames = 60 })
+		table.insert(delayes, { func = function() et.trap_SendServerCommand(c, "b 8 \"" .. welcome .. "\"\n") end, frames = 60 })
 	end
 end
