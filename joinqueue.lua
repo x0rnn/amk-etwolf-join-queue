@@ -34,7 +34,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 			local client = {}
 
-			for key, value in string.gfind(serialized, "(%w+)=\"([^\"]*)\"") do
+			for key, value in string.gfind(serialized, "([^= ]+)=\"([^\"]*)\"") do
 				if key == "name" or key == "guid" then
 					client[key] = value
 				else
@@ -102,7 +102,7 @@ function et_ClientCommand(c, command)
 		local team = string.lower(et.trap_Argv(1))
 
 		if team == "a" then
-			team = nil
+			team = -1
 		elseif team == "r" then
 			team = 1
 		elseif team == "b" then
@@ -115,7 +115,7 @@ function et_ClientCommand(c, command)
 		end
 
 		if clients[c].team == 1 or clients[c].team == 2 then
-			if team == nil or (team ~= nil and team == clients[c].team) then
+			if team == -1 or (team ~= -1 and team == clients[c].team) then
 				return 1
 			end
 		end
@@ -158,7 +158,7 @@ function et_ConsoleCommand()
 		elseif command == "putallies" then
 			team = 2
 		elseif command == "putany" then
-			team = nil
+			team = -1
 		elseif command == "remove" then
 			team = 3
 		else
@@ -180,13 +180,13 @@ function et_ConsoleCommand()
 			end
 
 			if clients[c].team == 1 or clients[c].team == 2 then
-				if team == nil or (team ~= nil and team == clients[c].team) then
+				if team == -1 or (team ~= -1 and team == clients[c].team) then
 					return 1
 				end
 			end
 
 			if not jq_Add(c, team, nil, nil, nil) then
-				if team == nil then
+				if team == -1 then
 					return 1
 				else
 					return 0
@@ -319,6 +319,33 @@ function jq_GetTeamFree()
 
 end
 
+function jq_GetWeakerTeam()
+
+	local axis = 0
+	local allies = 0
+
+	for i = 0, sv_maxclients - 1 do
+
+		if clients[i] ~= nil then
+
+			if clients[i].team == 1 then
+				axis = axis + 1
+			elseif clients[i].team == 2 then
+				allies = allies + 1
+			end
+
+		end
+
+	end
+
+	if axis > allies then
+		return 2
+	else
+		return 1
+	end
+
+end
+
 function jq_Add(c, team, class, weapon, weapon2)
 
 	local axis, allies = jq_GetTeamFree()
@@ -328,21 +355,7 @@ function jq_Add(c, team, class, weapon, weapon2)
 		return false
 	end
 
-	if team == nil and (axis > 0 or allies > 0) then
-
-		if axis > allies then
-			team = 1
-		else
-			team = 2
-		end
-
-		jq_PutTeam(c, team, class, weapon, weapon2)
-
-		return true
-
-	end
-
-	if clients[c].private == 1 then
+	if (team == -1 and (axis > 0 or allies > 0)) or clients[c].private == 1 then
 		jq_PutTeam(c, team, class, weapon, weapon2)
 		return true
 	end
@@ -399,6 +412,10 @@ function jq_PutTeam(c, team, class, weapon, weapon2)
 
 	table.insert(futures, function()
 
+		if team == -1 then
+			team = jq_GetWeakerTeam()
+		end
+
 		if team == 1 then
 			et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putaxis " .. c .. "\n")
 		else
@@ -433,11 +450,11 @@ function jq_PopQueue()
 		return
 	end
 
-	table.foreach(jq_GetQueue(nil), function(i, item)
+	table.foreach(jq_GetQueue(-1), function(i, item)
 
 		local team = item.queue_team
 
-		if team == nil then
+		if team == -1 then
 			if axis > allies then
 				team = 1
 			else
@@ -491,7 +508,7 @@ function jq_GetQueue(team)
 
 	for i = 0, sv_maxclients - 1 do
 
-		if clients[i] ~= nil and clients[i].queue ~= nil and (team == nil or clients[i].queue_team == nil or clients[i].queue_team == team) then
+		if clients[i] ~= nil and clients[i].queue ~= nil and (team == -1 or clients[i].queue_team == -1 or clients[i].queue_team == team) then
 			local client = { i = i }
 			table.foreach(clients[i], function(key, value) client[key] = value end)
 			table.insert(items, client)
@@ -521,7 +538,7 @@ function jq_Announce()
 
 		table.foreach(jq_GetQueue(1), function(i, item)
 
-			if item.queue_team == nil then
+			if item.queue_team == -1 then
 				all = all .. "^7, " .. item.name
 				alln[item.i] = true
 			end
