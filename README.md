@@ -43,3 +43,5 @@ set lua_modules "joinqueue.lua globalcombined.lua"
 ~~~
 
 This will make all commands working while preserving the exploit prevention.
+
+*Made with :heart: for [Hirntot](https://hirntot.org), thanks Harlekin for testing and advices.*
