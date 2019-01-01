@@ -18,6 +18,7 @@ local announces = { axis = "", allies = "", all = "" }
 local pop = true
 local put = true
 local sound
+local introduction
 
 function et_InitGame(levelTime, randomSeed, restart)
 
@@ -75,6 +76,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 	local jq_level_priority = et.trap_Cvar_Get("jq_level_priority")
 	local jq_level_override = et.trap_Cvar_Get("jq_level_override")
 	local jq_sound = et.trap_Cvar_Get("jq_sound")
+	local jq_introduction = et.trap_Cvar_Get("jq_introduction")
 
 	if jq_level_priority ~= "" then
 		level_priority = tonumber(jq_level_priority)
@@ -86,6 +88,10 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 	if jq_sound ~= "" then
 		sound = et.G_SoundIndex(jq_sound)
+	end
+
+	if jq_introduction ~= "" then
+		introduction = jq_introduction
 	end
 
 	jq_Announce()
@@ -406,6 +412,8 @@ function jq_Add(c, team, class, weapon, weapon2)
 			position = jq_GetPosition(2) + 1
 		end
 
+		jq_Introduce(c)
+
 	end
 
 	clients[c].queue = position
@@ -619,4 +627,12 @@ function jq_Announce()
 
 	end)
 
+end
+
+function jq_Introduce(c)
+	if introduction ~= nil then
+		table.insert(futures, function()
+			et.trap_SendServerCommand(c, "b 8 \"" .. introduction .. "\"\n")
+		end)
+	end
 end
