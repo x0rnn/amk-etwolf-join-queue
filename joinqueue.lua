@@ -1,3 +1,10 @@
+--[[
+Join queue Lua module for ET server
+Author: a domestic cat (c) 2019
+License: MIT
+Source: https://github.com/adawolfa/et-lua-joinqueue
+--]]
+
 local clients = {}
 local sv_maxclients = 64
 local team_maxplayers = 0
