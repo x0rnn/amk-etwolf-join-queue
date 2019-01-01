@@ -19,6 +19,7 @@ local pop = true
 local put = true
 local sound
 local introduction
+local welcome
 
 function et_InitGame(levelTime, randomSeed, restart)
 
@@ -77,6 +78,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 	local jq_level_override = et.trap_Cvar_Get("jq_level_override")
 	local jq_sound = et.trap_Cvar_Get("jq_sound")
 	local jq_introduction = et.trap_Cvar_Get("jq_introduction")
+	local jq_welcome = et.trap_Cvar_Get("jq_welcome")
 
 	if jq_level_priority ~= "" then
 		level_priority = tonumber(jq_level_priority)
@@ -92,6 +94,10 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 	if jq_introduction ~= "" then
 		introduction = jq_introduction
+	end
+
+	if jq_welcome ~= "" then
+		welcome = jq_welcome
 	end
 
 	jq_Announce()
@@ -311,7 +317,10 @@ end
 
 function jq_UpdateClient(c)
 
+	local new = false
+
 	if clients[c] == nil then
+		new = true
 		clients[c] = {}
 	end
 
@@ -326,6 +335,10 @@ function jq_UpdateClient(c)
 	clients[c].team = tonumber(et.gentity_get(c, "sess.sessionTeam"))
 	clients[c].name = et.gentity_get(c, "pers.netname")
 	clients[c].guid = string.lower(et.Info_ValueForKey(userinfo, "cl_guid"))
+
+	if clients[c].team == 3 and new then
+		jq_Welcome(c)
+	end
 
 end
 
@@ -634,5 +647,11 @@ function jq_Introduce(c)
 		table.insert(futures, function()
 			et.trap_SendServerCommand(c, "b 8 \"" .. introduction .. "\"\n")
 		end)
+	end
+end
+
+function jq_Welcome(c)
+	if welcome ~= nil then
+		table.insert(delays, { func = function() et.trap_SendServerCommand(c, "b 8 \"" .. welcome .. "\"\n") end, frames = 60 })
 	end
 end
