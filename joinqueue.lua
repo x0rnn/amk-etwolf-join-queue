@@ -247,7 +247,13 @@ function jq_FindClient(term)
 	local number = tonumber(term)
 
 	if number ~= nil then
+
+		if clients[number] == nil then
+			return nil
+		end
+
 		return number
+
 	end
 
 	term = et.Q_CleanStr(term)
