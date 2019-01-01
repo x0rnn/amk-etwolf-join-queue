@@ -652,7 +652,7 @@ end
 function jq_Introduce(c)
 	if introduction ~= nil then
 		table.insert(futures, function()
-			et.trap_SendServerCommand(c, "b 8 \"" .. introduction .. "\"\n")
+			et.trap_SendServerCommand(c, "cp \"" .. introduction .. "\"\n")
 		end)
 	end
 end
