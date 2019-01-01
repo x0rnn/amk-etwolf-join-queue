@@ -140,6 +140,7 @@ function et_ClientCommand(c, command)
 			end
 
 			if team == clients[c].team then
+				jq_Remove(c)
 				return 0
 			end
 
