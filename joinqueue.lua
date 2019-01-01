@@ -13,9 +13,11 @@ local level_priority
 local level_override
 local admins = {}
 local futures = {}
+local delayes = {}
 local announces = { axis = "", allies = "", all = "" }
 local pop = true
 local put = true
+local sound
 
 function et_InitGame(levelTime, randomSeed, restart)
 
@@ -72,6 +74,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 	local jq_level_priority = et.trap_Cvar_Get("jq_level_priority")
 	local jq_level_override = et.trap_Cvar_Get("jq_level_override")
+	local jq_sound = et.trap_Cvar_Get("jq_sound")
 
 	if jq_level_priority ~= "" then
 		level_priority = tonumber(jq_level_priority)
@@ -79,6 +82,10 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 	if jq_level_override ~= "" then
 		level_override = tonumber(jq_level_override)
+	end
+
+	if jq_sound ~= "" then
+		sound = et.G_SoundIndex(jq_sound)
 	end
 
 	jq_Announce()
@@ -238,6 +245,26 @@ function et_RunFrame(levelTime)
 	if table.getn(futures) > 0 then
 		table.foreach(futures, function(i, future) future() end)
 		futures = {}
+	end
+
+	if table.getn(delayes) > 0 then
+
+		local remains = {}
+
+		table.foreach(delayes, function(i, delay)
+
+			delay.frames = delay.frames - 1
+
+			if delay.frames == 0 then
+				delay.func()
+			else
+				table.insert(remains, delay)
+			end
+
+		end)
+
+		delayes = remains
+
 	end
 
 end
@@ -473,7 +500,12 @@ function jq_PopQueue()
 		end
 
 		pop = false
+
 		jq_PutTeam(item.i, team, item.class, item.weapon, item.weapon2)
+
+		if sound ~= nil then
+			table.insert(delayes, { func = function() et.G_Sound(item.i, sound) end, frames = 10 })
+		end
 
 	end)
 
