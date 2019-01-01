@@ -31,4 +31,12 @@ Players connected using private password are always allowed to join a team anyti
 - `jq_level_priority [number]` - prioritized levels
 - `jq_level_override [number]` - overriding levels
 
-Note that, internally, module changes `team_maxplayers` to `0` on game initialization and restores the original value on shutdown (end of round). This is a workaround for overrides and should cause no issues.
+Note that, internally, module changes `team_maxplayers` to `0` on game initialization and restores the original value on shutdown (end of round). This is a workaround for overrides and should cause no issues. However, **make sure this cvar is not locked**, that is, set it using `set team_maxplayers n` instead of `setl team_maxplayers n`.
+
+If you use `globalcombinedfixes.lua` or any version of it, `/team a` or `/team r <more arguments>` command might not be working and issuing an invalid join command message instead. If this is the case, put `joinqueue.lua` **before** the `globalcombinedfixes.lua`, like this:
+
+~~~
+set lua_modules "joinqueue.lua globalcombined.lua"
+~~~
+
+This will make all commands working while preserving the exploit prevention.
