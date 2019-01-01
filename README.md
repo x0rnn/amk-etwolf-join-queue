@@ -42,6 +42,8 @@ If you use `globalcombinedfixes.lua` or any version of it, `/team a` or `/team r
 set lua_modules "joinqueue.lua globalcombined.lua"
 ~~~
 
+This will make all commands working while preserving the exploit prevention.
+
 ### Example configuration
 
 ~~~
@@ -53,7 +55,5 @@ set jq_sound sound/misc/skill_up.wav
 set jq_introduction "^7You have entered join queue. You will be automatically joined once a slot becomes available."
 set jq_welcome "^7This server uses join queue. Join a team and wait!"
 ~~~
-
-This will make all commands working while preserving the exploit prevention.
 
 *Made with :heart: for [Hirntot](https://hirntot.org), thanks Harlekin for testing and advices.*
