@@ -23,6 +23,7 @@ local banner
 local banner_delay = 10000
 local banner_interval = 90000
 local tick = 0
+local shuffles = false
 
 function et_InitGame(levelTime, randomSeed, restart)
 
@@ -129,7 +130,9 @@ end
 
 function et_ClientCommand(c, command)
 
-	if string.lower(command) == "team" then
+	command = string.lower(command)
+
+	if command == "team" then
 
 		local team = string.lower(et.trap_Argv(1))
 
@@ -177,6 +180,15 @@ function et_ClientCommand(c, command)
 
 		if jq_Add(c, team, class, weapon, weapon2) then
 			return 1
+		end
+
+	elseif command == "ref" and et.trap_Argc() > 1 then
+
+		local ref = string.lower(et.trap_Argv(1))
+
+		if ref == "shuffleteamsxp_norestart" then
+			shuffles = true
+			table.insert(delayes, { func = function() shuffles = false end, frames = 40 })
 		end
 
 	end
@@ -532,7 +544,7 @@ end
 
 function jq_PopQueue()
 
-	if not pop then
+	if not pop or shuffles then
 		return
 	end
 
