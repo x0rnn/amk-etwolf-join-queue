@@ -212,6 +212,10 @@ function et_ConsoleCommand()
 			team = -1
 		elseif command == "remove" then
 			team = 3
+		elseif command == "shuffleteamsxp_norestart" then
+			shuffles = true
+			table.insert(delayes, { func = function() shuffles = false end, frames = 40 })
+			return 0
 		else
 			return 0
 		end
