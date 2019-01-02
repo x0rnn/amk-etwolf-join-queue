@@ -19,7 +19,10 @@ local pop = true
 local put = true
 local sound
 local introduction
-local welcome
+local banner
+local banner_delay = 10000
+local banner_interval = 90000
+local tick = 0
 
 function et_InitGame(levelTime, randomSeed, restart)
 
@@ -78,7 +81,9 @@ function et_InitGame(levelTime, randomSeed, restart)
 	local jq_level_override = et.trap_Cvar_Get("jq_level_override")
 	local jq_sound = et.trap_Cvar_Get("jq_sound")
 	local jq_introduction = et.trap_Cvar_Get("jq_introduction")
-	local jq_welcome = et.trap_Cvar_Get("jq_welcome")
+	local jq_banner = et.trap_Cvar_Get("jq_banner")
+	local jq_banner_delay = et.trap_Cvar_Get("jq_banner_delay")
+	local jq_banner_interval = et.trap_Cvar_Get("jq_banner_interval")
 
 	if jq_level_priority ~= "" then
 		level_priority = tonumber(jq_level_priority)
@@ -96,8 +101,16 @@ function et_InitGame(levelTime, randomSeed, restart)
 		introduction = jq_introduction
 	end
 
-	if jq_welcome ~= "" then
-		welcome = jq_welcome
+	if jq_banner ~= "" then
+		banner = jq_banner
+	end
+
+	if jq_banner_delay ~= "" then
+		banner_delay = tonumber(jq_banner_delay) * 1000
+	end
+
+	if jq_banner_interval ~= "" then
+		banner_interval = tonumber(jq_banner_interval) * 1000
 	end
 
 	jq_Announce()
@@ -244,7 +257,9 @@ function et_ShutdownGame(restart)
 			local serialized = ""
 
 			table.foreach(clients[i], function(key, value)
-				serialized = serialized .. " " .. key .. "=\"" .. value .. "\""
+				if key ~= "banner" then
+					serialized = serialized .. " " .. key .. "=\"" .. value .. "\""
+				end
 			end)
 
 			et.trap_Cvar_Set("jq_client" .. i, string.sub(serialized, 2, string.len(serialized)))
@@ -283,6 +298,27 @@ function et_RunFrame(levelTime)
 		end)
 
 		delayes = remains
+
+	end
+
+	if tick + 1000 <= levelTime then
+
+		tick = levelTime
+
+		for i = 0, sv_maxclients - 1 do
+
+			if clients[i] ~= nil and clients[i].team == 3 then
+
+				if clients[i].banner == nil then
+					clients[i].banner = tick + banner_delay
+				elseif clients[i].banner < tick then
+					jq_Banner(i)
+					clients[i].banner = tick + banner_interval
+				end
+
+			end
+
+		end
 
 	end
 
@@ -454,6 +490,7 @@ function jq_Remove(c)
 	clients[c].class = nil
 	clients[c].weapon = nil
 	clients[c].weapon2 = nil
+	clients[c].banner = nil
 
 	jq_Announce()
 
@@ -657,8 +694,10 @@ function jq_Introduce(c)
 	end
 end
 
-function jq_Welcome(c)
-	if welcome ~= nil then
-		table.insert(delayes, { func = function() et.trap_SendServerCommand(c, "b 8 \"" .. welcome .. "\"\n") end, frames = 60 })
+function jq_Banner(c)
+	if banner ~= nil then
+		table.insert(futures, function()
+			et.trap_SendServerCommand(c, "b 8 \"" .. banner .. "\"\n")
+		end)
 	end
 end

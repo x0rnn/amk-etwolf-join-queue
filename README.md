@@ -32,7 +32,9 @@ Players connected using private password are always allowed to join a team anyti
 - `jq_level_override [number]` - overriding levels
 - `jq_sound [filename]` - sound file to be played after joining a team from queue (e. g.: `sound/misc/skill_up.wav`)
 - `jq_introduction [text]` - introduction message sent to player after joining a queue
-- `jq_welcome [text]` - welcome message informing the player about queuing feature
+- `jq_banner [text]` - banner message informing the player about queuing feature
+- `jq_banner_delay [number]` - number of seconds before first banner (default: `10`)
+- `jq_banner_interval [number]` - number of seconds between subsequent banners (default: `90`)
 
 Note that, internally, module changes `team_maxplayers` to `0` on game initialization and restores the original value on shutdown (end of round). This is a workaround for overrides and should cause no issues. However, **make sure this cvar is not locked**, that is, set it using `set team_maxplayers n` instead of `setl team_maxplayers n`.
 
@@ -54,6 +56,8 @@ set jq_level_override 4
 set jq_sound sound/misc/skill_up.wav
 set jq_introduction "^7You have entered join queue. You will be automatically joined once a slot becomes available."
 set jq_welcome "^7This server uses join queue. Join a team and wait!"
+set jq_banner_delay 10
+set jq_banner_interval 90
 ~~~
 
 *Made with :heart: for [Hirntot](https://hirntot.org), thanks Harlekin for testing and advices.*
