@@ -486,9 +486,11 @@ function jq_Add(c, team, class, weapon, weapon2)
 	end
 
 	local position = 0
+	local new = true
 
 	if clients[c].queue ~= nil then
 		position = clients[c].queue
+		new = false
 	else
 
 		if clients[c].override == 1 then
@@ -511,11 +513,20 @@ function jq_Add(c, team, class, weapon, weapon2)
 	clients[c].weapon2 = weapon2
 
 	jq_Announce()
+
+	if new and clients[c].team == 3 then
+		jq_Shoutcaster(c, true)
+	end
+
 	return true
 
 end
 
 function jq_Remove(c)
+
+	if clients[c].queue ~= nil then
+		jq_Shoutcaster(c, false)
+	end
 
 	clients[c].queue = nil
 	clients[c].queue_team = nil
@@ -732,4 +743,18 @@ function jq_Banner(c)
 			et.trap_SendServerCommand(c, "b 8 \"" .. banner .. "\"\n")
 		end)
 	end
+end
+
+function jq_Shoutcaster(c, status)
+
+	table.insert(futures, function()
+
+		if status then
+			et.trap_SendConsoleCommand(et.EXEC_APPEND, "makeshoutcaster " .. c .. "\n")
+		else
+			et.trap_SendConsoleCommand(et.EXEC_APPEND, "removeshoutcaster " .. c .. "\n")
+		end
+
+	end)
+
 end
