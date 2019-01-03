@@ -189,6 +189,8 @@ function et_ClientCommand(c, command)
 		if ref == "shuffleteamsxp_norestart" then
 			shuffles = true
 			table.insert(delayes, { func = function() shuffles = false end, frames = 40 })
+		elseif ref == "shuffleteamsxp" then
+			shuffles = true
 		end
 
 	end
@@ -215,6 +217,9 @@ function et_ConsoleCommand()
 		elseif command == "shuffleteamsxp_norestart" then
 			shuffles = true
 			table.insert(delayes, { func = function() shuffles = false end, frames = 40 })
+			return 0
+		elseif command == "shuffleteamsxp" then
+			shuffles = true
 			return 0
 		else
 			return 0
