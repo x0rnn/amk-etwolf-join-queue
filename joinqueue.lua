@@ -385,15 +385,30 @@ function jq_UpdateClient(c)
 
 	local userinfo = et.trap_GetUserinfo(c)
 
-	clients[c].private = 0
-
-	if et.trap_Cvar_Get("sv_privatepassword") ~= "" and et.Info_ValueForKey(userinfo, "password") == et.trap_Cvar_Get("sv_privatepassword") then
-		clients[c].private = 1
-	end
-
+	clients[c].override = 0
+	clients[c].priority = 0
 	clients[c].team = tonumber(et.gentity_get(c, "sess.sessionTeam"))
 	clients[c].name = et.gentity_get(c, "pers.netname")
 	clients[c].guid = string.lower(et.Info_ValueForKey(userinfo, "cl_guid"))
+
+	if admins[clients[c].guid] ~= nil then
+
+		if level_override ~= nil and admins[clients[c].guid] >= level_override then
+			clients[c].override = 1
+		end
+
+		if level_priority ~= nil and admins[clients[c].guid] >= level_priority then
+			clients[c].priority = 1
+		end
+
+	end
+
+	local sv_privatepassword = et.trap_Cvar_Get("sv_privatepassword")
+	local password = et.Info_ValueForKey(userinfo, "password")
+
+	if clients[c].override == 0 and sv_privatepassword ~= "" and password == sv_privatepassword then
+		clients[c].override = 1
+	end
 
 	if clients[c].team == 3 and new then
 		jq_Welcome(c)
@@ -408,7 +423,7 @@ function jq_GetTeamFree()
 
 	for i = 0, sv_maxclients - 1 do
 
-		if clients[i] ~= nil then
+		if clients[i] ~= nil and clients[i].override == 0 then
 
 			if clients[i].team == 1 and axis > 0 then
 				axis = axis - 1
@@ -460,7 +475,7 @@ function jq_Add(c, team, class, weapon, weapon2)
 		return false
 	end
 
-	if (team == -1 and (axis > 0 or allies > 0)) or clients[c].private == 1 then
+	if (team == -1 and (axis > 0 or allies > 0)) or clients[c].override == 1 then
 		jq_PutTeam(c, team, class, weapon, weapon2)
 		return true
 	end
@@ -471,15 +486,11 @@ function jq_Add(c, team, class, weapon, weapon2)
 		position = clients[c].queue
 	else
 
-		if admins[clients[c].guid] ~= nil then
-
-			if level_override ~= nil and admins[clients[c].guid] >= level_override then
-				jq_PutTeam(c, team, class, weapon, weapon2)
-				return true
-			elseif level_priority ~= nil and admins[clients[c].guid] >= level_priority then
-				position = jq_GetPosition(1) - 1
-			end
-
+		if clients[c].override == 1 then
+			jq_PutTeam(c, team, class, weapon, weapon2)
+			return true
+		elseif clients[c].priority == 1 then
+			position = jq_GetPosition(1) - 1
 		else
 			position = jq_GetPosition(2) + 1
 		end
