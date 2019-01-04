@@ -31,6 +31,7 @@ local banner_delay = 10000
 local banner_interval = 90000
 local tick = 0
 local shuffles = false
+local shoutcast_announcement = false
 
 local WEAPON_MORTAR = 35
 local WEAPON_PANZERFAUST = 5
@@ -330,6 +331,12 @@ function et_ShutdownGame(restart)
 
 	et.trap_Cvar_Set("team_maxplayers", team_maxplayers)
 
+end
+
+function et_Print(message)
+	if shoutcast_announcement and string.sub(message, 1, 16) == "etpro shoutcast:" then
+		et.trap_SendServerCommand(-1, "cp \"\"\n")
+	end
 end
 
 function et_RunFrame(levelTime)
@@ -877,6 +884,7 @@ function jq_Shoutcaster(c, status)
 	table.insert(futures, function()
 
 		if status then
+			shoutcast_announcement = true
 			et.trap_SendConsoleCommand(et.EXEC_APPEND, "makeshoutcaster " .. c .. "\n")
 		else
 			et.trap_SendConsoleCommand(et.EXEC_APPEND, "removeshoutcaster " .. c .. "\n")
