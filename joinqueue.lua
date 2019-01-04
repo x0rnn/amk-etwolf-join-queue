@@ -18,6 +18,9 @@ local team_maxriflegrenades
 local shrubbot = "shrubbot.cfg"
 local level_priority
 local level_override
+local level_mute
+local mute_say = 1
+local mute_vsay = 1
 local admins = {}
 local futures = {}
 local delayes = {}
@@ -106,6 +109,10 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 	local jq_level_priority = et.trap_Cvar_Get("jq_level_priority")
 	local jq_level_override = et.trap_Cvar_Get("jq_level_override")
+	local jq_level_mute = et.trap_Cvar_Get("jq_level_mute")
+	local jq_mute_mode = et.trap_Cvar_Get("jq_mute_mode")
+	local jq_mute_say = et.trap_Cvar_Get("jq_mute_say")
+	local jq_mute_vsay = et.trap_Cvar_Get("jq_mute_vsay")
 	local jq_sound = et.trap_Cvar_Get("jq_sound")
 	local jq_introduction = et.trap_Cvar_Get("jq_introduction")
 	local jq_banner = et.trap_Cvar_Get("jq_banner")
@@ -138,6 +145,26 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 	if jq_banner_interval ~= "" then
 		banner_interval = tonumber(jq_banner_interval) * 1000
+	end
+
+	if jq_level_mute ~= "" then
+		level_mute = tonumber(jq_level_mute)
+	end
+
+	if jq_mute_say ~= nil then
+		if tonumber(jq_mute_say) > 0 then
+			mute_say = true
+		else
+			mute_say = false
+		end
+	end
+
+	if jq_mute_vsay ~= nil then
+		if tonumber(jq_mute_vsay) > 0 then
+			mute_vsay = true
+		else
+			mute_vsay = false
+		end
 	end
 
 	team_maxfieldops = tonumber(et.trap_Cvar_Get("team_maxfieldops"))
@@ -225,6 +252,20 @@ function et_ClientCommand(c, command)
 			table.insert(delayes, { func = function() shuffles = false end, frames = 40 })
 		elseif ref == "shuffleteamsxp" then
 			shuffles = true
+		end
+
+	elseif (command == "say" or command == "vsay") and clients[c].team == 3 and clients[c].mute == 1 then
+
+		if command == "say" and mute_say then
+
+			table.insert(futures, function()
+				et.G_Say(c, et.SAY_TEAM, et.ConcatArgs(1));
+			end)
+
+			return 1
+
+		elseif command == "vsay" and mute_vsay then
+			return 1
 		end
 
 	elseif command == "queue" then
@@ -430,6 +471,12 @@ function jq_UpdateClient(c)
 	clients[c].name = et.gentity_get(c, "pers.netname")
 	clients[c].guid = string.lower(et.Info_ValueForKey(userinfo, "cl_guid"))
 
+	if level_mute == nil then
+		clients[c].mute = 0
+	else
+		clients[c].mute = 1
+	end
+
 	if admins[clients[c].guid] ~= nil then
 
 		if level_override ~= nil and admins[clients[c].guid] >= level_override then
@@ -438,6 +485,10 @@ function jq_UpdateClient(c)
 
 		if level_priority ~= nil and admins[clients[c].guid] >= level_priority then
 			clients[c].priority = 1
+		end
+
+		if level_mute ~= nil and admins[clients[c].guid] >= level_mute then
+			clients[c].mute = 0
 		end
 
 	end

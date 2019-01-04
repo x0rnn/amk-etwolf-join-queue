@@ -30,6 +30,9 @@ Players connected using private password are always allowed to join a team anyti
 - `jq_shrubbot [filename]` - shrubbot file name (default: `shrubbot.cfg`)
 - `jq_level_priority [number]` - prioritized levels
 - `jq_level_override [number]` - overriding levels
+- `jq_level_mute [number]` - players with level below this number can't send messages to global chat (messages will be automatically forwarded to spectators team only)
+- `jq_mute_say [1|0]` - forwards global messages to spectators team only (default: `1`), only works with `jq_level_mute` defined
+- `jq_mute_vsay [1|0]` - disables `vsay` command for spectators (default: `1`), only works with `jq_level_mute` defined
 - `jq_sound [filename]` - sound file to be played after joining a team from queue (e. g.: `sound/misc/skill_up.wav`)
 - `jq_introduction [text]` - introduction message sent to player after joining a queue
 - `jq_banner [text]` - banner message informing the player about queuing feature
@@ -53,6 +56,9 @@ set team_maxplayers 6
 set jq_shrubbot shrubbot.cfg
 set jq_level_priority 2
 set jq_level_override 4
+set jq_level_mute 1
+set jq_mute_say 0
+set jq_mute_vsay 1
 set jq_sound sound/misc/skill_up.wav
 set jq_introduction "^7You have entered join queue. You will be automatically joined once a slot becomes available."
 set jq_welcome "^7This server uses join queue. Join a team and wait!"
