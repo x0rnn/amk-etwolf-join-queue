@@ -390,10 +390,7 @@ end
 
 function jq_UpdateClient(c)
 
-	local new = false
-
 	if clients[c] == nil then
-		new = true
 		clients[c] = {}
 	end
 
@@ -422,10 +419,6 @@ function jq_UpdateClient(c)
 
 	if clients[c].override == 0 and sv_privatepassword ~= "" and password == sv_privatepassword then
 		clients[c].override = 1
-	end
-
-	if clients[c].team == 3 and new then
-		jq_Welcome(c)
 	end
 
 end
