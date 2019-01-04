@@ -199,6 +199,9 @@ function et_ClientCommand(c, command)
 			shuffles = true
 		end
 
+	elseif command == "queue" then
+		jq_TellQueue(c)
+		return 1
 	end
 
 	return 0
@@ -760,6 +763,41 @@ function jq_Shoutcaster(c, status)
 		else
 			et.trap_SendConsoleCommand(et.EXEC_APPEND, "removeshoutcaster " .. c .. "\n")
 		end
+
+	end)
+
+end
+
+function jq_TellQueue(c)
+
+	table.insert(futures, function()
+
+		local list = ""
+		local count = 0
+
+		table.foreach(jq_GetQueue(-1), function(i, item)
+
+			count = count + 1
+
+			if item.queue_team == -1 then
+				list = list .. "^7, ^7(" .. count .. ")^7 "
+			elseif item.queue_team == 1 then
+				list = list .. "^7, ^1(" .. count .. ")^7 "
+			elseif item.queue_team == 2 then
+				list = list .. "^7, ^4(" .. count .. ")^7 "
+			end
+
+			list = list .. item.name
+
+		end)
+
+		if count == 0 then
+			list = "^7No players in queue."
+		else
+			list = "^7Queue: " .. string.sub(list, 5, string.len(list))
+		end
+
+		et.trap_SendServerCommand(c, "b 8 \"" .. list .. "\"\n")
 
 	end)
 

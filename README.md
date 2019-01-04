@@ -12,7 +12,7 @@ Player can issue `/team a` always - even if there's an empty slot in both teams.
 
 Additional parameters of `team` command (class, weapon, alt. weapon) are supported and restored on team join.
 
-Player can leave the queue by joining the spectator team (`/team s`, limbo menu or `!spec` eventually).
+Player can leave the queue by joining the spectator team (`/team s`, limbo menu or `!spec` eventually). Any player can issue `/queue` command to find out who is currently in line.
 
 Every time there's a change in the queue, all players affected will be notified in chat area.
 
