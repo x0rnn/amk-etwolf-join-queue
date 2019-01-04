@@ -237,6 +237,9 @@ function et_ClientCommand(c, command)
 	elseif command == "queue" then
 		jq_TellQueue(c)
 		return 1
+	elseif (command == "say" or command == "say_team" or command == "say_buddy" or command == "say_teamnl") and et.trap_Argc() > 1 and string.lower(et.trap_Argv(1)) == "!queue" then
+		jq_TellQueue(c)
+		return 1
 	end
 
 	return 0
