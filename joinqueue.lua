@@ -38,19 +38,25 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 		local serialized = et.trap_Cvar_Get("jq_client" .. i)
 
-		if serialized ~= nil then
+		if serialized ~= "" then
 
 			local client = {}
+			local valid = false
 
 			for key, value in string.gfind(serialized, "([^= ]+)=\"([^\"]*)\"") do
 				if key == "name" or key == "guid" then
 					client[key] = value
+					valid = true
 				else
 					client[key] = tonumber(value)
 				end
 			end
 
-			clients[i] = client
+			if valid then
+				clients[i] = client
+			else
+				clients[i] = nil
+			end
 
 		else
 			clients[i] = nil
