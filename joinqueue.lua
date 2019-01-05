@@ -526,10 +526,8 @@ function jq_Add(c, team, class, weapon, weapon2)
 		if clients[c].override == 1 then
 			jq_PutTeam(c, team, class, weapon, weapon2)
 			return true
-		elseif clients[c].priority == 1 then
-			position = jq_GetPosition(1) - 1
 		else
-			position = jq_GetPosition(2) + 1
+			position = jq_GetPosition(clients[c].priority) + 1
 		end
 
 		jq_Introduce(c)
@@ -666,14 +664,17 @@ function jq_PopQueue()
 
 end
 
-function jq_GetPosition(mode)
+function jq_GetPosition(priority)
 
 	local position = 0
 
+	if priority == 0 then
+		position = position + 500
+	end
+
 	for i = 0, sv_maxclients - 1 do
 
-		-- TODO: Multiple prioritized clients?
-		if clients[i] ~= nil and clients[i].queue ~= nil and ((mode == 1 and clients[i].queue < position) or (mode == 2 and clients[i].queue > position)) then
+		if clients[i] ~= nil and clients[i].queue ~= nil and clients[i].priority == priority and clients[i].queue > position then
 			position = clients[i].queue
 		end
 
