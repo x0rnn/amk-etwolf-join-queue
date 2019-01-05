@@ -865,7 +865,7 @@ end
 function jq_Banner(c)
 	if banner ~= nil then
 		table.insert(futures, function()
-			et.trap_SendServerCommand(c, "b 8 \"" .. banner .. "\"\n")
+			et.trap_SendServerCommand(c, "chat \"" .. banner .. "\"\n")
 		end)
 	end
 end
