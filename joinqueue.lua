@@ -8,6 +8,13 @@ Source: https://github.com/adawolfa/et-lua-joinqueue
 local clients = {}
 local sv_maxclients = 64
 local team_maxplayers = 0
+local team_maxcovertops
+local team_maxfieldops
+local team_maxmortars
+local team_maxpanzers
+local team_maxflamers
+local team_maxmg42s
+local team_maxriflegrenades
 local shrubbot = "shrubbot.cfg"
 local level_priority
 local level_override
@@ -24,6 +31,19 @@ local banner_delay = 10000
 local banner_interval = 90000
 local tick = 0
 local shuffles = false
+
+local WEAPON_MORTAR = 35
+local WEAPON_PANZERFAUST = 5
+local WEAPON_FLAMETHROWER = 6
+local WEAPON_MG42 = 31
+local WEAPON_K43 = 23
+local WEAPON_GARAND = 24
+
+local CLASS_SOLDIER = 0
+local CLASS_MEDIC = 1
+local CLASS_ENGINEER = 2
+local CLASS_FIELDOPS = 3
+local CLASS_COVERTOPS = 4
 
 function et_InitGame(levelTime, randomSeed, restart)
 
@@ -119,6 +139,14 @@ function et_InitGame(levelTime, randomSeed, restart)
 	if jq_banner_interval ~= "" then
 		banner_interval = tonumber(jq_banner_interval) * 1000
 	end
+
+	team_maxfieldops = tonumber(et.trap_Cvar_Get("team_maxfieldops"))
+	team_maxcovertops = tonumber(et.trap_Cvar_Get("team_maxcovertops"))
+	team_maxmortars = tonumber(et.trap_Cvar_Get("team_maxmortars"))
+	team_maxpanzers = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
+	team_maxflamers = tonumber(et.trap_Cvar_Get("team_maxflamers"))
+	team_maxmg42s = tonumber(et.trap_Cvar_Get("team_maxmg42s"))
+	team_maxriflegrenades = tonumber(et.trap_Cvar_Get("team_maxriflegrenades"))
 
 	jq_Announce()
 
@@ -559,9 +587,20 @@ function jq_PutTeam(c, team, class, weapon, weapon2)
 			et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putallies " .. c .. "\n")
 		end
 
-		if class ~= nil then
-			et.gentity_set(c, "sess.latchPlayerType", class)
+		if class == nil then
+			class = CLASS_MEDIC
 		end
+
+		if not jq_IsClassAllowed(team, class) then
+			class = CLASS_MEDIC
+			weapon = nil
+			weapon2 = nil
+		elseif not jq_IsWeaponAllowed(team, class, weapon) then
+			weapon = nil
+			weapon2 = nil
+		end
+
+		et.gentity_set(c, "sess.latchPlayerType", class)
 
 		if weapon ~= nil then
 			et.gentity_set(c, "sess.latchPlayerWeapon", weapon)
@@ -728,6 +767,74 @@ function jq_Announce()
 		announces.all = all
 
 	end)
+
+end
+
+function jq_CountClasses(team, class)
+
+	local count = 0
+
+	for i = 0, sv_maxclients - 1 do
+
+		if clients[i] ~= nil and clients[i].team == team then
+			if tonumber(et.gentity_get(i, "sess.latchPlayerType")) == class then
+				count = count + 1
+			end
+		end
+
+	end
+
+	return count
+
+end
+
+function jq_IsClassAllowed(team, class)
+
+	if team_maxfieldops > 0 and class == CLASS_FIELDOPS and jq_CountClasses(team, CLASS_FIELDOPS) >= team_maxfieldops then
+		return false
+	elseif team_maxcovertops > 0 and class == CLASS_COVERTOPS and jq_CountClasses(team, CLASS_COVERTOPS) >= team_maxcovertops then
+		return false
+	end
+
+	return true
+
+end
+
+function jq_IsWeaponAllowed(team, class, weapon)
+
+	if class == CLASS_ENGINEER and team_maxriflegrenades > 0 and (weapon == WEAPON_K43 or weapon == WEAPON_GARAND) and jq_CountWeapons(team, weapon) >= team_maxriflegrenades then
+		return false
+	elseif class == CLASS_SOLDIER then
+		if team_maxmortars > 0 and weapon == WEAPON_MORTAR and jq_CountWeapons(team, WEAPON_MORTAR) >= team_maxmortars then
+			return false
+		elseif team_maxpanzers > 0 and weapon == WEAPON_PANZERFAUST and jq_CountWeapons(team, WEAPON_PANZERFAUST) >= team_maxpanzers then
+			return false
+		elseif team_maxflamers > 0 and weapon == WEAPON_FLAMETHROWER and jq_CountWeapons(team, WEAPON_FLAMETHROWER) >= team_maxflamers then
+			return false
+		elseif team_maxmg42s > 0 and weapon == WEAPON_MG42 and jq_CountWeapons(team, WEAPON_MG42) >= team_maxmg42s then
+			return false
+		end
+	end
+
+	return true
+
+end
+
+function jq_CountWeapons(team, weapon)
+
+	local count = 0
+
+	for i = 0, sv_maxclients - 1 do
+
+		if clients[i] ~= nil and clients[i].team == team then
+			if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == weapon then
+				count = count + 1
+			end
+		end
+
+	end
+
+	return count
 
 end
 
