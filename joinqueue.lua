@@ -588,6 +588,8 @@ function jq_PutTeam(c, team, class, weapon, weapon2)
 
 	table.insert(futures, function()
 
+		et.trap_Cvar_Set("team_maxplayers", 0)
+
 		if team == -1 then
 			team = jq_GetWeakerTeam()
 		end
