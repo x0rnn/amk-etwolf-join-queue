@@ -148,7 +148,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 	team_maxmg42s = tonumber(et.trap_Cvar_Get("team_maxmg42s"))
 	team_maxriflegrenades = tonumber(et.trap_Cvar_Get("team_maxriflegrenades"))
 
-	jq_Announce()
+	jq_Announce(nil)
 
 end
 
@@ -540,7 +540,11 @@ function jq_Add(c, team, class, weapon, weapon2)
 	clients[c].weapon = weapon
 	clients[c].weapon2 = weapon2
 
-	jq_Announce()
+	if new then
+		jq_Announce(nil)
+	else
+		jq_Announce(c)
+	end
 
 	if new and clients[c].team == 3 then
 		jq_Shoutcaster(c, true)
@@ -552,7 +556,10 @@ end
 
 function jq_Remove(c)
 
+	local removed = false
+
 	if clients[c].queue ~= nil then
+		removed = true
 		jq_Shoutcaster(c, false)
 	end
 
@@ -563,7 +570,13 @@ function jq_Remove(c)
 	clients[c].weapon2 = nil
 	clients[c].banner = nil
 
-	jq_Announce()
+	if removed then
+		table.insert(futures, function()
+			et.trap_SendServerCommand(c, "b 8 \"^7You have left the queue.\"\n")
+		end)
+	end
+
+	jq_Announce(nil)
 
 end
 
@@ -660,7 +673,7 @@ function jq_PopQueue()
 		pop = true
 	end)
 
-	jq_Announce()
+	jq_Announce(nil)
 
 end
 
@@ -706,7 +719,7 @@ function jq_GetQueue(team)
 
 end
 
-function jq_Announce()
+function jq_Announce(who)
 
 	table.insert(futures, function()
 
@@ -741,25 +754,27 @@ function jq_Announce()
 		allies = "^4ALLIES ^7queue: " .. string.sub(allies, 5, string.len(allies))
 		all = "^7Join queue: " .. string.sub(all, 5, string.len(all))
 
-		if axis ~= announces.axis then
+		if axis ~= announces.axis or who ~= nil then
 			table.foreach(axisn, function(i)
-				if alln[i] == nil then
+				if alln[i] == nil and (who == nil or who == i) then
 					et.trap_SendServerCommand(i, "b 8 \"" .. axis .. "\"\n")
 				end
 			end)
 		end
 
-		if allies ~= announces.allies then
+		if allies ~= announces.allies or who ~= nil then
 			table.foreach(alliesn, function(i)
-				if alln[i] == nil then
+				if alln[i] == nil and (who == nil or who == i) then
 					et.trap_SendServerCommand(i, "b 8 \"" .. allies .. "\"\n")
 				end
 			end)
 		end
 
-		if all ~= announces.all then
+		if all ~= announces.all or who ~= nil then
 			table.foreach(alln, function(i)
-				et.trap_SendServerCommand(i, "b 8 \"" .. all .. "\"\n")
+				if who == nil or who == i then
+					et.trap_SendServerCommand(i, "b 8 \"" .. all .. "\"\n")
+				end
 			end)
 		end
 
