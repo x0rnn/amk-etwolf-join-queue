@@ -567,7 +567,7 @@ function jq_Add(c, team, class, weapon, weapon2)
 		jq_Announce(c)
 	end
 
-	if new and clients[c].team == 3 then
+	if new then
 		jq_Shoutcaster(c, true)
 	end
 
@@ -932,8 +932,10 @@ function jq_Shoutcaster(c, status)
 	table.insert(futures, function()
 
 		if status then
-			shoutcast_announcement = true
-			et.trap_SendConsoleCommand(et.EXEC_APPEND, "makeshoutcaster " .. c .. "\n")
+			if clients[c].team == 3 then
+				shoutcast_announcement = true
+				et.trap_SendConsoleCommand(et.EXEC_APPEND, "makeshoutcaster " .. c .. "\n")
+			end
 		else
 			et.trap_SendConsoleCommand(et.EXEC_APPEND, "removeshoutcaster " .. c .. "\n")
 		end
