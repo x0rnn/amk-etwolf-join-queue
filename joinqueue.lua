@@ -469,17 +469,19 @@ function jq_GetTeamFree()
 
 	for i = 0, sv_maxclients - 1 do
 
-		if clients[i] ~= nil and clients[i].override == 0 then
+		if clients[i] ~= nil then
 
-			if clients[i].team == 1 then
-				if axis > 0 then
+			if clients[i].override == 0 then
+				if clients[i].team == 1 and axis > 0 then
 					axis = axis - 1
-				end
-				axisReal = axisReal + 1
-			elseif clients[i].team == 2 then
-				if allies > 0 then
+				elseif clients[i].team == 2 and allies > 0 then
 					allies = allies - 1
 				end
+			end
+
+			if clients[i].team == 1 then
+				axisReal = axisReal + 1
+			elseif clients[i].team == 2 then
 				alliesReal = alliesReal + 1
 			end
 
@@ -680,8 +682,10 @@ function jq_PopQueue()
 			return
 		end
 
-		if not jq_BalancingCanJoin(team, item.i, axisReal, alliesReal) then
-			return
+		if item.override == 0 then
+			if not jq_BalancingCanJoin(team, item.i, axisReal, alliesReal) then
+				return
+			end
 		end
 
 		if team == 1 then
