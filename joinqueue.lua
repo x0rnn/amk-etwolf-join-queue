@@ -15,6 +15,7 @@ local team_maxpanzers
 local team_maxflamers
 local team_maxmg42s
 local team_maxriflegrenades
+local g_teamforcebalance
 local shrubbot = "shrubbot.cfg"
 local level_priority
 local level_override
@@ -148,6 +149,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 	team_maxflamers = tonumber(et.trap_Cvar_Get("team_maxflamers"))
 	team_maxmg42s = tonumber(et.trap_Cvar_Get("team_maxmg42s"))
 	team_maxriflegrenades = tonumber(et.trap_Cvar_Get("team_maxriflegrenades"))
+	g_teamforcebalance = tonumber(et.trap_Cvar_Get("g_teamforcebalance"))
 
 	jq_Announce(nil)
 
@@ -462,22 +464,30 @@ function jq_GetTeamFree()
 
 	local axis = team_maxplayers
 	local allies = team_maxplayers
+	local axisReal = 0
+	local alliesReal = 0
 
 	for i = 0, sv_maxclients - 1 do
 
 		if clients[i] ~= nil and clients[i].override == 0 then
 
-			if clients[i].team == 1 and axis > 0 then
-				axis = axis - 1
-			elseif clients[i].team == 2 and allies > 0 then
-				allies = allies - 1
+			if clients[i].team == 1 then
+				if axis > 0 then
+					axis = axis - 1
+				end
+				axisReal = axisReal + 1
+			elseif clients[i].team == 2 then
+				if allies > 0 then
+					allies = allies - 1
+				end
+				alliesReal = alliesReal + 1
 			end
 
 		end
 
 	end
 
-	return axis, allies
+	return axis, allies, axisReal, alliesReal
 
 end
 
@@ -510,11 +520,13 @@ end
 
 function jq_Add(c, team, class, weapon, weapon2)
 
-	local axis, allies = jq_GetTeamFree()
+	local axis, allies, axisReal, alliesReal = jq_GetTeamFree()
 
 	if (team == 1 and axis > 0) or (team == 2 and allies > 0) or (team == clients[c].team) then
-		jq_Remove(c)
-		return false
+		if jq_BalancingCanJoin(team, c, axisReal, alliesReal) then
+			jq_Remove(c)
+			return false
+		end
 	end
 
 	if (team == -1 and (axis > 0 or allies > 0)) or clients[c].override == 1 then
@@ -638,7 +650,7 @@ function jq_PopQueue()
 		return
 	end
 
-	local axis, allies = jq_GetTeamFree()
+	local axis, allies, axisReal, alliesReal = jq_GetTeamFree()
 
 	if axis == 0 and allies == 0 then
 		return
@@ -649,14 +661,26 @@ function jq_PopQueue()
 		local team = item.queue_team
 
 		if team == -1 then
-			if axis > allies then
-				team = 1
+			if g_teamforcebalance > 0 then
+				if alliesReal > axisReal then
+					team = 1
+				else
+					team = 2
+				end
 			else
-				team = 2
+				if axis > allies then
+					team = 1
+				else
+					team = 2
+				end
 			end
 		end
 
 		if (team == 1 and axis == 0) or (team == 2 and allies == 0) then
+			return
+		end
+
+		if not jq_BalancingCanJoin(team, item.i, axisReal, alliesReal) then
 			return
 		end
 
@@ -681,6 +705,28 @@ function jq_PopQueue()
 	end)
 
 	jq_Announce(nil)
+
+end
+
+function jq_BalancingCanJoin(team, c, axisReal, alliesReal)
+
+	if g_teamforcebalance < 1 then
+		return true
+	end
+
+	if (clients[c].team == 3 and ((team == 1 and axisReal > alliesReal) or (team == 2 and alliesReal > axisReal))) then
+		return false
+	end
+
+	if (clients[c].team == 1 and team == 2) or (clients[c].team == 2 and team == 1) then
+		if team == 1 and axisReal >= alliesReal then
+			return false
+		elseif team == 2 and alliesReal >= axisReal then
+			return false
+		end
+	end
+
+	return true
 
 end
 
