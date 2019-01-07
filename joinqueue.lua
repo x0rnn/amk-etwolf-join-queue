@@ -701,7 +701,7 @@ function jq_PopQueue()
 		jq_PutTeam(item.i, team, item.class, item.weapon, item.weapon2)
 
 		if sound ~= nil then
-			table.insert(delayes, { func = function() et.G_Sound(item.i, sound) end, frames = 10 })
+			table.insert(futures, function() et.G_ClientSound(item.i, sound) end)
 		end
 
 	end)
@@ -979,4 +979,11 @@ function jq_TellQueue(c)
 
 	end)
 
+end
+
+-- credits: KMOD v1.5
+function et.G_ClientSound(c, sound)
+	local tempentity = et.G_TempEntity(et.gentity_get(c, "r.currentOrigin"), 54)
+	et.gentity_set(tempentity, "s.teamNum", c)
+	et.gentity_set(tempentity, "s.eventParm", sound)
 end
