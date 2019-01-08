@@ -287,6 +287,7 @@ function et_ConsoleCommand()
 			end
 
 			if force then
+				jq_Remove(c)
 				jq_PutTeam(c, team)
 				return 1
 			end
