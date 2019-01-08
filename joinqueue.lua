@@ -244,6 +244,7 @@ function et_ConsoleCommand()
 	if string.lower(et.trap_Argv(0)) == "ref" and et.trap_Argc() > 2 then
 
 		local command = string.lower(et.trap_Argv(1))
+		local force = false
 		local team
 
 		if command == "putaxis" then
@@ -261,6 +262,12 @@ function et_ConsoleCommand()
 		elseif command == "shuffleteamsxp" then
 			shuffles = true
 			return 0
+		elseif command == "putaxisf" then
+			team = 1
+			force = true
+		elseif command == "putalliesf" then
+			team = 2
+			force = true
 		else
 			return 0
 		end
@@ -277,6 +284,11 @@ function et_ConsoleCommand()
 			if team == 3 then
 				jq_Remove(c)
 				return 0
+			end
+
+			if force then
+				jq_PutTeam(c, team)
+				return 1
 			end
 
 			if clients[c].team == 1 or clients[c].team == 2 then
