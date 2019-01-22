@@ -597,10 +597,6 @@ function jq_Add(c, team, class, weapon, weapon2)
 		jq_Announce(c)
 	end
 
-	if new then
-		jq_Shoutcaster(c, true)
-	end
-
 	return true
 
 end
