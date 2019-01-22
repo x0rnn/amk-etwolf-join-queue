@@ -322,7 +322,7 @@ function et_ClientDisconnect(c)
 	jq_PopQueue()
 end
 
-function et_ShutdownGame(restart)
+function et_Quit()
 
 	for i = 0, sv_maxclients - 1 do
 
