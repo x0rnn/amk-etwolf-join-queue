@@ -538,7 +538,7 @@ function jq_Add(c, team, class, weapon, weapon2)
 	local axis, allies, axisReal, alliesReal = jq_GetTeamFree()
 
 	if (team == 1 and axis > 0) or (team == 2 and allies > 0) or (team == clients[c].team) then
-		if jq_BalancingCanJoin(team, c, axisReal, alliesReal) then
+		if jq_BalancingCanJoin(team, c, axisReal, alliesReal) and jq_RestrictionCanJoin(team, c, class, weapon) then
 			jq_Remove(c)
 			return false
 		end
@@ -743,6 +743,18 @@ function jq_BalancingCanJoin(team, c, axisReal, alliesReal)
 		elseif team == 2 and alliesReal >= axisReal then
 			return false
 		end
+	end
+
+	return true
+
+end
+
+function jq_RestrictionCanJoin(team, c, class, weapon)
+
+	if class ~= nil and not jq_IsClassAllowed(team, class) then
+		return false
+	elseif weapon ~= nil and not jq_IsWeaponAllowed(team, class, weapon) then
+		return false
 	end
 
 	return true
