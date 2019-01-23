@@ -675,19 +675,19 @@ function jq_PopQueue()
 
 		local team = item.queue_team
 
-		if team == -1 and g_teamforcebalance > 0 then
-			if alliesReal > axisReal then
-				team = 1
-			elseif axisReal > alliesReal then
-				team = 2
-			end
-		end
-
-		if team == -1 then
-			if axis > allies then
-				team = 1
+		if team == -1 and item.override == 0 then
+			if  g_teamforcebalance > 0 then
+				if axis > 0 and jq_BalancingCanJoin(1, item.i, axisReal, alliesReal) then
+					team = 1
+				elseif allies > 0 and jq_BalancingCanJoin(2, item.i, axisReal, alliesReal) then
+					team = 2
+				end
 			else
-				team = 2
+				if axis > allies then
+					team = 1
+				else
+					team = 2
+				end
 			end
 		end
 
@@ -697,7 +697,7 @@ function jq_PopQueue()
 
 		if item.override == 0 then
 
-			if not jq_BalancingCanJoin(team, item.i, axisReal, alliesReal) then
+			if team == -1 or not jq_BalancingCanJoin(team, item.i, axisReal, alliesReal) then
 				return
 			end
 
@@ -707,6 +707,16 @@ function jq_PopQueue()
 				allies = allies - 1
 			end
 
+		end
+
+		if team == -1 then
+			team = jq_GetWeakerTeam()
+		end
+
+		if team == 1 then
+			axisReal = axisReal + 1
+		else
+			alliesReal = alliesReal + 1
 		end
 
 		pop = false
