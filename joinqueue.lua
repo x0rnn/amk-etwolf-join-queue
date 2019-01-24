@@ -545,8 +545,24 @@ function jq_Add(c, team, class, weapon, weapon2)
 	end
 
 	if (team == -1 and (axis > 0 or allies > 0)) or clients[c].override == 1 then
-		jq_PutTeam(c, team, class, weapon, weapon2)
-		return true
+
+		if team == -1 then
+			if (axis > 0 and allies > 0) or clients[c].override == 1 then
+				team = jq_GetWeakerTeam()
+			else
+				if axis > 0 and jq_BalancingCanJoin(1, c, axisReal, alliesReal) then
+					team = 1
+				elseif allies > 0 and jq_BalancingCanJoin(2, c, axisReal, alliesReal) then
+					team = 2
+				end
+			end
+		end
+
+		if team ~= -1 then
+			jq_PutTeam(c, team, class, weapon, weapon2)
+			return true
+		end
+
 	end
 
 	local position = 0
@@ -556,16 +572,8 @@ function jq_Add(c, team, class, weapon, weapon2)
 		position = clients[c].queue
 		new = false
 	else
-
-		if clients[c].override == 1 then
-			jq_PutTeam(c, team, class, weapon, weapon2)
-			return true
-		else
-			position = jq_GetPosition(clients[c].priority) + 1
-		end
-
+		position = jq_GetPosition(clients[c].priority) + 1
 		jq_Introduce(c)
-
 	end
 
 	clients[c].queue = position
