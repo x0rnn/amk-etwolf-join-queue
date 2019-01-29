@@ -733,6 +733,7 @@ function jq_PopQueue()
 		pop = false
 
 		jq_PutTeam(item.i, team, item.class, item.weapon, item.weapon2)
+		et.G_LogPrint("etpro announce: Enqueued player [" .. et.Q_CleanStr(item.name) .. "] popped to team [" .. team .. "]\n");
 
 		if sound ~= nil then
 			table.insert(futures, function() et.G_ClientSound(item.i, sound) end)
