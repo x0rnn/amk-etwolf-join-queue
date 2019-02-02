@@ -22,7 +22,7 @@ local level_override
 local admins = {}
 local futures = {}
 local delayes = {}
-local announces = { axis = "", allies = "", all = "" }
+local announces = { axis = "", allies = "", all = "", log = "" }
 local pop = true
 local put = true
 local sound
@@ -858,7 +858,17 @@ function jq_Announce(who)
 		local alliesn = {}
 		local alln = {}
 
+		local log = ""
+
 		table.foreach(jq_GetQueue(1), function(i, item)
+
+			if item.queue_team == -1 then
+				log = log .. "; (A) " .. et.Q_CleanStr(item.name)
+			elseif item.queue_team == 1 then
+				log = log .. "; (R) " .. et.Q_CleanStr(item.name)
+			elseif item.queue_team == 2 then
+				log = log .. "; (B) " .. et.Q_CleanStr(item.name)
+			end
 
 			if item.queue_team == -1 then
 				all = all .. "^7, " .. item.name
@@ -905,9 +915,20 @@ function jq_Announce(who)
 			end)
 		end
 
+		if log ~= "" then
+			log = "etpro announce: Queue: " .. string.sub(log, 3, string.len(log)) .. "\n"
+		else
+			log = "etpro announce: Queue: empty\n"
+		end
+
+		if log ~= announces.log then
+			et.G_LogPrint(log)
+		end
+
 		announces.axis = axis
 		announces.allies = allies
 		announces.all = all
+		announces.log = log
 
 	end)
 
