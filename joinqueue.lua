@@ -839,7 +839,7 @@ function jq_Announce(who)
 
 		local log = ""
 
-		table.foreach(jq_GetQueue(1), function(i, item)
+		table.foreach(jq_GetQueue(-1), function(i, item)
 
 			if item.queue_team == -1 then
 				log = log .. "; (A) " .. et.Q_CleanStr(item.name)
@@ -848,6 +848,10 @@ function jq_Announce(who)
 			elseif item.queue_team == 2 then
 				log = log .. "; (B) " .. et.Q_CleanStr(item.name)
 			end
+
+		end)
+
+		table.foreach(jq_GetQueue(1), function(i, item)
 
 			if item.queue_team == -1 then
 				all = all .. "^7, " .. item.name
