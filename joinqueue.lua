@@ -838,6 +838,7 @@ function jq_Announce(who)
 		local alln = {}
 
 		local log = ""
+		local count = 0
 
 		table.foreach(jq_GetQueue(-1), function(i, item)
 
@@ -848,6 +849,8 @@ function jq_Announce(who)
 			elseif item.queue_team == 2 then
 				log = log .. "; (B) " .. et.Q_CleanStr(item.name)
 			end
+
+			count = count + 1
 
 		end)
 
@@ -912,6 +915,8 @@ function jq_Announce(who)
 		announces.allies = allies
 		announces.all = all
 		announces.log = log
+
+		et.trap_Cvar_Set("jq_count", count)
 
 	end)
 
