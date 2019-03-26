@@ -390,7 +390,7 @@ function et_RunFrame(levelTime)
 
 		for i = 0, sv_maxclients - 1 do
 
-			if clients[i] ~= nil and clients[i].team == 3 then
+			if clients[i] ~= nil and clients[i].team == 3 and clients[i].queue == nil and clients[i].override == 0 then
 
 				if clients[i].banner == nil then
 					clients[i].banner = tick + banner_delay
