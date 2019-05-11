@@ -33,6 +33,7 @@ local banner_interval = 90000
 local tick = 0
 local shuffles = false
 local shoutcast_announcement = false
+local privledged = {}
 
 local WEAPON_MORTAR = 35
 local WEAPON_PANZERFAUST = 5
@@ -93,18 +94,39 @@ function et_InitGame(levelTime, randomSeed, restart)
 	end
 
 	local fd, len = et.trap_FS_FOpenFile(shrubbot, et.FS_READ)
+	local content
 
 	if len > -1 then
 
-		local content = et.trap_FS_Read(fd, len)
+		content = et.trap_FS_Read(fd, len)
+		et.trap_FS_FCloseFile(fd)
 
 		for guid, level in string.gfind(content, "[Gg]uid%s*=%s*(%x+)%s*\n[Ll]evel%s*=%s*(%d+)") do
 			admins[string.lower(guid)] = tonumber(level)
 		end
 
 	end
+	
+	fd, len = et.trap_FS_FOpenFile("joinqueue.cfg", et.FS_READ)
 
-	et.trap_FS_FCloseFile(fd)
+	if len > -1 then
+
+		local now = jq_GetDate()
+		content = et.trap_FS_Read(fd, len)
+		et.trap_FS_FCloseFile(fd)
+
+		for guid, privledge, since, till in string.gfind(content, "[\r\n](%x+)%s+(%a+)%s+(%d+)%s+(%d+)") do
+			if tonumber(since) <= now and tonumber(till) >= now then
+				guid = string.lower(guid)
+				if privledge == "priority" then
+					privledged[guid] = 1
+				else
+					privledged[guid] = 2
+				end
+			end
+		end
+
+	end
 
 	local jq_level_priority = et.trap_Cvar_Get("jq_level_priority")
 	local jq_level_override = et.trap_Cvar_Get("jq_level_override")
@@ -465,6 +487,12 @@ function jq_UpdateClient(c)
 			clients[c].priority = 1
 		end
 
+	end
+
+	if privledged[clients[c].guid] == 1 then
+		clients[c].priority = 1
+	elseif privledged[clients[c].guid] == 2 then
+		clients[c].override = 1
 	end
 
 	local sv_privatepassword = et.trap_Cvar_Get("sv_privatepassword")
@@ -1056,6 +1084,10 @@ function jq_TellQueue(c)
 
 	end)
 
+end
+
+function jq_GetDate()
+	return tonumber(os.date("%y%m%d"))
 end
 
 -- credits: KMOD v1.5
