@@ -598,6 +598,10 @@ end
 
 function jq_Remove(c)
 
+	if clients[c] == nil then
+		return
+	end
+
 	local removed = false
 
 	if clients[c].queue ~= nil then
