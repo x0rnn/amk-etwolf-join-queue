@@ -169,7 +169,7 @@ function et_ClientCommand(c, command)
 
 	command = string.lower(command)
 
-	if command == "team" then
+	if command == "team" and clients[c] ~= nil then
 
 		local team = string.lower(et.trap_Argv(1))
 
