@@ -867,6 +867,7 @@ function jq_Announce(who)
 
 		local log = ""
 		local count = 0
+		local active = ""
 
 		table.foreach(jq_GetQueue(-1), function(i, item)
 
@@ -878,6 +879,13 @@ function jq_Announce(who)
 				log = log .. "; (B) " .. et.Q_CleanStr(item.name)
 			end
 
+			if active == "" then
+				active = " " .. item.i .. " "
+			else
+				active = active .. item.i .. " "
+			end
+
+			
 			count = count + 1
 
 		end)
@@ -945,6 +953,7 @@ function jq_Announce(who)
 		announces.log = log
 
 		et.trap_Cvar_Set("jq_count", count)
+		et.trap_Cvar_Set("jq_active", active)
 
 	end)
 
