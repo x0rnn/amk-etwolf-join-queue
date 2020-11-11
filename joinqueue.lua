@@ -259,9 +259,23 @@ function et_ClientCommand(c, command)
 	elseif command == "queue" then
 		jq_TellQueue(c)
 		return 1
-	elseif (command == "say" or command == "say_team" or command == "say_buddy" or command == "say_teamnl") and et.trap_Argc() > 1 and string.lower(et.trap_Argv(1)) == "!queue" then
-		jq_TellQueue(c)
-		return 1
+	elseif (command == "say" or command == "say_team" or command == "say_buddy" or command == "say_teamnl") and et.trap_Argc() > 1 then
+
+		local word = string.lower(et.trap_Argv(1))
+
+		if word == "!queue" then
+			jq_TellQueue(c)
+			return 1
+		elseif word == "!join" then
+			et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putany " .. c .. "\n")
+		elseif word == "!axis" then
+			et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putaxis " .. c .. "\n")
+		elseif word == "!allies" then
+			et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putallies " .. c .. "\n")
+		elseif word == "!spec" then
+			et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. c .. "\n")
+		end
+
 	end
 
 	return 0
