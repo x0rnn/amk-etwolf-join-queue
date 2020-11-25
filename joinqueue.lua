@@ -595,7 +595,7 @@ function jq_Add(c, team, class, weapon, weapon2)
 		end
 	end
 
-	if (team == -1 and (axis > 0 or allies > 0)) or clients[c].override == 1 then
+	if (team == -1 and (axis > 0 or allies > 0)) or clients[c].override == 1 or (clients[c].priority == 1 and (clients[c].team == 1 or clients[c].team == 2) and (team == 1 or team == 2)) then
 
 		if team == -1 then
 			if (axis > 0 and allies > 0) or clients[c].override == 1 then
