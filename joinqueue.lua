@@ -33,6 +33,9 @@ local banner_interval = 90000
 local tick = 0
 local shuffles = false
 local shoutcast_announcement = false
+local startupTime
+local time = 0
+local wasBlocked = false
 
 local WEAPON_MORTAR = 35
 local WEAPON_PANZERFAUST = 5
@@ -51,6 +54,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 
 	et.RegisterModname("joinqueue.lua " .. et.FindSelf());
 
+	startupTime = levelTime
 	sv_maxclients = tonumber(et.trap_Cvar_Get("sv_maxclients"))
 	team_maxplayers = tonumber(et.trap_Cvar_Get("team_maxplayers"))
 
@@ -355,6 +359,8 @@ function et_Print(message)
 end
 
 function et_RunFrame(levelTime)
+
+	time = levelTime - startupTime
 
 	if table.getn(futures) > 0 then
 		table.foreach(futures, function(i, future) future() end)
@@ -683,9 +689,24 @@ function jq_PopQueue()
 		return
 	end
 
+	local blocked = false
+
 	table.foreach(jq_GetQueue(-1), function(i, item)
 
 		local team = item.queue_team
+
+		if time < 10000 and (blocked or tonumber(et.gentity_get(item.i, "sess.sessionTeam")) == 0) then
+
+			if wasBlocked == false then
+				table.insert(delayes, { func = jq_PopQueue, frames = 10 * 20 })
+			end
+
+			blocked = true
+			wasBlocked = true
+
+			return
+
+		end
 
 		if team == -1 and item.override == 0 then
 			if  g_teamforcebalance > 0 then
