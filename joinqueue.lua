@@ -284,6 +284,15 @@ end
 
 function et_ConsoleCommand()
 
+	if string.lower(et.trap_Argv(0)) == "shuffledamage" then
+		shuffles = true
+		table.insert(delayes, { func = function() shuffles = false end, frames = 40 })
+		return 0
+	elseif string.lower(et.trap_Argv(0)) == "shuffledamage_restart" then
+		shuffles = true
+		return 0
+	end
+
 	if string.lower(et.trap_Argv(0)) == "ref" and et.trap_Argc() > 2 then
 
 		local command = string.lower(et.trap_Argv(1))
